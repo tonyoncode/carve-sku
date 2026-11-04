@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Carve SKU Finder</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:560px;margin:40px auto;padding:0 16px;background:#0f1115;color:#e8eaed}
+h1{font-size:20px}
+input{width:100%;box-sizing:border-box;font-size:22px;padding:12px 14px;border:2px solid #3a3f4b;border-radius:10px;text-transform:uppercase;background:#1a1d24;color:#fff;caret-color:#7cb7ff}
+input::placeholder{color:#6b7280}
+input:focus{outline:none;border-color:#4d9bff}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:14px;background:#1a1d24;border:1px solid #2c313c;border-radius:10px;cursor:pointer}
+.row:hover{border-color:#4d9bff}
+.row b{font-size:18px}.sku{font-size:12px;color:#8b93a1}
+.price{font-size:20px;font-weight:700;white-space:nowrap;color:#7ee787}
+.copied{background:#12281a;border-color:#2ea043}
+.hint{color:#8b93a1;font-size:13px;margin-top:8px}
+</style></head><body>
+<h1>Carve SKU Finder</h1>
+<input id="q" placeholder="Type SKU e.g. DRDG55" autofocus autocomplete="off">
+<div id="out"></div>
+<div class="hint">Click a result to copy: <i>$110 Memphis Gauze Dress</i></div>
+<script>
+const D={"JCTR67":["Rhea Wool Trucker","$198"],"JCMS10":["Donner Reversible Jacket","$248"],"JCMM55":["Vineyard Shacket","$118"],"JCRU10":["Opal Utility Jacket","$148"],"JCVT27":["Betty Vest","$118"],"JCVT66":["Baker Reversible Vest","$158"],"OWMX10":["Minxy Down Jacket","$350"],"FLFZ50":["Briar Fleece Jacket","$108"],"JCSK99":["Hudson Stretch Cord Shacket","$88"],"SWFD35":["Aster Fuzzy Topper","$118"],"OWUH19":["Horizon Down Jacket","$230"],"OWLV50":["Davos Down Vest","$218"],"TKBJ85":["Essential Topper","$88"],"JCLJ92":["Maggie Quilted Topper","$124"],"OWTB77":["Silverton Reversible Down Vest","$185"],"OWLP22":["Davos Down Jacket","$375"],"OWVN78":["Portillo Jacket","$245"],"JABC67":["Haley Bomber Jacket","$89"],"JCJJ44":["Mason Reversible Jacquard Jacket","$158"],"JCQV26":["Laughlin Vest","$118"],"JCSB30":["Posie Boucle Jacket","$88"],"JKBN85":["Benson Reversible Jacket","$168"],"SWRV44":["Rockvale Sweater","$88"],"SWLW90":["Zella Mesh Pullover","$76 - $82"],"SWLW64":["Zella Pullover","$76"],"JAHB11":["Roley Cowl","$79 - $84"],"FLRC20":["Rowayton Colorblock Cowl","$68 - $76"],"TKRB76":["Bodie Funnel Neck","$68"],"SWNL20":["Olivia Plush Sweater","$98"],"SWPO15":["Ruth Reversible Fuzzy Sweater","$98"],"SWCD20":["Tinsley Spacedye Sweater","$108"],"FLPO15":["Clara Fleece Pullover","$78"],"SWHS30":["Cayden Crew Sweater","$98"],"SWYY15":["Field Sweater","$118"],"SWLW25":["Zella Merino Sweater","$98"],"SWPT95":["Monroe Sweater","$96"],"TKRH25":["Birdie Slub Hoodie","$82"],"TKAR45":["Denise Turtleneck","$58"],"SWNS99":["Rockvale Allover Stitch","$98"],"SWPH40":["Stowe Hooded Sweater","$118"],"LTSW34":["Rowayton Cowl Neck","$68 - $72"],"SWVB77":["Ash Spacedye Sweater","$108"],"FLHS80":["Brie Sherpa Hoodie","$89"],"TKPS30":["Naomi Sweatshirt","$52 - $56"],"SWMC40":["Morgan Polo Sweater","$92"],"SWRB20":["Clarissa Sweater","$89"],"SWDR55":["Kirby Cardigan","$78"],"SWWC17":["Etta Shawl Cardigan","$138"],"SWAV64":["Aurora Sweater","$92"],"SWZM15":["Brookline Zip","$98"],"TKPD20":["Anneke Supersoft Dolman","$56"],"FLDS40":["Lennox Fleece Top","$72"],"SWFH30":["Stowe Hooded Fairisle Sweater","$118"],"FLPC75":["Roley Jacquard Cowl","$79"],"SWDS40":["Durango Plush Cardigan","$138"],"SWTN10":["Woodward Sweater","$88"],"TKMN40":["Bray Mockneck Top","$48"],"SWLV67":["Livia Sweater","$89"],"SWHN15":["Amara Pointelle Sweater","$88"],"TKCT85":["Cove Supersoft Cowl","$62"],"SWNY20":["Groton Sweater","$92"],"SWNM10":["Wales Sweater","$78"],"SWPV30":["Phoebe Sweater Top","$78"],"SWCD85":["Tinsley Sweater","$98"],"SSHT35":["Rainier Hoodie","$76"],"SWFD10":["Walsh Sweater","$92"],"SWCD92":["Tessa Cardigan","$78"],"SWHA43":["Delia Hoodie","$68"],"SWRS44":["Cabana Sweater","$118"],"SWWU18":["Whitcomb Sweater","$98"],"SWCR40":["Estes Crop Sweater","$88"],"SWMA46":["Eastpoint Sweater","$98"],"SWCC36":["Idlewood Sweater","$124"],"SWSB83":["Veronica Sweater","$89"],"SWNS35":["Rockvale Deux","$98"],"TKDS29":["Ruby Crewneck","$68"],"SWOF63":["Durango Sweater","$124"],"TWHH80":["Gia Coverup","$74"],"DRDG20":["Blair Dress","$98"],"DRLS30":["Lana Dress","$98"],"DKPT20":["Elodie Rib Dress","$84"],"DRCB75":["Venture Balsa Dress","$88"],"PTJU75":["Nyla Twill Jumpsuit","$148"],"DRTF45":["Coastal Cover Up","$68"],"DRWV40":["Macy Dress","$89"],"DRTS08":["Lexi Dress","$78"],"DRJU55":["Remi Romper","$98"],"DRBL70":["Nellie Linen Dress","$98"],"DRNN10":["Nellie Eyelet Dress","$98"],"DRFS10":["Maeve Dress","$78"],"SHJU30":["Nyla Linen Romper","$98"],"DRTD70":["Jacey Textured Dress","$98"],"PTJU25":["Bedford Jumpsuit","$174"],"DRTD10":["Nellie Dress","$98"],"DKJS34":["Bonfire Jumpsuit","$98"],"DRKT60":["Gemma Dress","$89"],"DRDG55":["Memphis Gauze Dress","$110"],"DRWV90":["Kiera Dress","$109"],"DRSR70":["Giselle Romper","$89"],"DRCE24":["Camila Dress","$68"],"DWBD99":["Aida Dress","$110"],"DCBF51":["Iris Coverup","$78"],"DRST64":["Vikki Dress","$86"],"DKCO21":["Napa Dress","$72"],"DRWB38":["Blakely Dress","$82"],"DRPV10":["Hadley Dress","$88"],"DWMB33":["Mabel Dress","$92"],"DRAM44":["Nora Dress","$88"],"PTJU30":["Knox Gauze Jumpsuit","$98"],"PTSJ26":["Skyler Skinny Jean","$99"],"PTSL62":["Brady Straight Leg","$110"],"PTPO28":["Alma Jean","$98"],"PTBJ70":["Chelsea Jogger","$72"],"PTOV46":["Jason Cord Overall","$136"],"PTHB41":["Incline Tight","$74"],"PTSC35":["Skyler Skinny Cord","$99"],"PTFL88":["Sausalito Pant","$98"],"PTWJ30":["Calista Pant","$78"],"PTWL35":["Rex Wide Leg","$98 - $99"],"PTFL79":["Tibby Flare","$124"],"PTOV90":["Jason Railroad Stripe Overall","$136"],"PTRD75":["Suki Linen Pant","$82"],"PTWY89":["Avery Beach Pant","$68"],"PTCB50":["Corey Butter Pant","$118"],"PTPP72":["Corey Pant","$99"],"PTHC30":["Carson Cord Hi Rise","$99"],"PTDG01":["Calista Gauze Pant","$84"],"PTMJ28":["Carson Hi Rise Jean","$99"],"PTCC48":["Carson Cord","$98 - $99"],"PTBF18":["Carson Jean","$99"],"PTCG75":["Nina Cargo Pant","$118"],"PTKA40":["Kaia Pant","$78"],"PTCG10":["Zoe Twill Pant","$98"],"PTJG78":["Garner Jogger","$56"],"PTCC70":["Austin Crop Jean","$110"],"PTJH19":["Portland Wide Leg","$98"]};
+function copyText(t){
+  const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).catch(fb)}else{fb()}
+}
+let lastSku=null;
+window.addEventListener('message',e=>{
+  if(e.source!==window||!e.data||e.data.type!=='skubundl-typed'||!lastSku)return;
+  lastSku.textContent=lastSku.textContent.replace(/ - (copied|typed).*$/,'')+(e.data.ok?' - typed in Whatnot chat: ':' - copied (Whatnot chat not found): ')+e.data.text;
+});
+const q=document.getElementById('q'),out=document.getElementById('out');
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toUpperCase();out.innerHTML='';
+  if(!v)return;
+  Object.keys(D).filter(k=>k.includes(v)).slice(0,10).forEach(k=>{
+    const [n,p]=D[k],txt=p+' '+n;
+    const d=document.createElement('div');d.className='row';
+    d.innerHTML='<div><b>'+n+'</b><div class="sku">'+k+'</div></div><div class="price">'+p+'</div>';
+    d.onclick=()=>{copyText(txt);window.postMessage({type:'skubundl-type',text:txt},'*');document.querySelectorAll('.row').forEach(r=>r.classList.remove('copied'));d.classList.add('copied');lastSku=d.querySelector('.sku');lastSku.textContent=k+' - copied: '+txt};
+    out.appendChild(d);
+  });
+  if(!out.children.length)out.innerHTML='<div class="hint">No match</div>';
+});
+</script></body></html>
