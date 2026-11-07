@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "SKU Finder → Whatnot chat",
+  "version": "1.5",
+  "description": "When you copy a line in SKU Finder, it is typed straight into the Whatnot chat bar.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://*.whatnot.com/*",
+    "https://whatnot.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://skuhelp.vercel.app/*",
+        "https://carve-sku.vercel.app/*",
+        "https://skuhelp.netlify.app/*",
+        "https://skubundl.netlify.app/*",
+        "https://*.skubundl.netlify.app/*",
+        "http://localhost/*",
+        "file:///*"
+      ],
+      "js": [
+        "finder.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://*.whatnot.com/*",
+        "https://whatnot.com/*"
+      ],
+      "js": [
+        "whatnot.js"
+      ],
+      "all_frames": true
+    }
+  ]
+}
