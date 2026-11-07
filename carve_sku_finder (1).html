@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Carve SKU Finder</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:560px;margin:40px auto;padding:0 16px;background:#0f1115;color:#e8eaed}
+h1{font-size:20px}
+input{width:100%;box-sizing:border-box;font-size:22px;padding:12px 14px;border:2px solid #3a3f4b;border-radius:10px;text-transform:uppercase;background:#1a1d24;color:#fff;caret-color:#7cb7ff}
+input::placeholder{color:#6b7280}
+input:focus{outline:none;border-color:#4d9bff}
+.row{display:block;margin-top:10px;padding:14px;background:#1a1d24;border:1px solid #2c313c;border-radius:10px;cursor:pointer}
+.row:hover{border-color:#4d9bff}
+.main{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{padding:8px 14px;border:2px solid #3a3f4b;border-radius:8px;background:#232733;color:#e8eaed;font-size:16px;font-weight:600;cursor:pointer;user-select:none}
+.chip small{font-size:11px;color:#8b93a1;margin-left:4px;font-weight:400}
+.chip.on{background:#1f4d8f;border-color:#4d9bff}
+.row b{font-size:18px}.sku{font-size:12px;color:#8b93a1}
+.price{font-size:20px;font-weight:700;white-space:nowrap;color:#7ee787}
+.copied{background:#12281a;border-color:#2ea043}
+.hint{color:#8b93a1;font-size:13px;margin-top:8px}
+.opt{display:block;margin-top:10px;font-size:14px;color:#8b93a1;cursor:pointer}.opt input{width:auto;font-size:inherit;margin-right:6px;text-transform:none}
+#send{margin-top:12px}#send[hidden]{display:none}
+#sendbtn{width:100%;font-size:22px;font-weight:700;padding:16px;border:0;border-radius:10px;background:#2ea043;color:#fff;cursor:pointer}
+#sendbtn:hover{background:#3fb950}
+#bar{height:6px;background:#2ea043;border-radius:3px;margin-top:6px;width:100%}
+#bar.go{animation:shrink 5s linear forwards}
+@keyframes shrink{from{width:100%}to{width:0}}
+#listen{margin-top:12px;width:100%;font-size:16px;font-weight:600;padding:12px;border:2px solid #3a3f4b;border-radius:10px;background:#232733;color:#e8eaed;cursor:pointer}
+#listen.on{background:#1f4d8f;border-color:#4d9bff}
+#lstat{font-size:13px;color:#8b93a1;margin-top:6px}#heard{font-size:12px;color:#6b7280;margin-top:2px;min-height:15px}
+</style></head><body>
+<h1>Carve SKU Finder</h1>
+<input id="q" placeholder="Type SKU e.g. DRDG55" autofocus autocomplete="off">
+<label class="opt"><input type="checkbox" id="ann" checked> Use /announce</label>
+<button id="listen">Listen to tab audio</button><div id="lstat">Click, choose the Whatnot tab, tick "Also share tab audio"</div><div id="heard"></div>
+<div id="send" hidden><button id="sendbtn">SEND IN CHAT</button><div id="bar"></div></div>
+<div id="out"></div>
+<div class="hint">Pick sizes (optional), then click the name/price to copy: <i>$110 Memphis Gauze Dress S, M</i></div>
+<script>
+const D={"JCTR67":["Rhea Wool Trucker","$198",[["XXS",19],["XS",59],["S",162],["M",165],["L",102],["XL",28]]],"JCMS10":["Donner Reversible Jacket","$248",[["XXS",7],["XS",40],["S",126],["M",115],["L",66],["XL",27]]],"JCMM55":["Vineyard Shacket","$118",[["XXS",12],["XS",22],["S",106],["M",141],["L",34],["XL",8]]],"JCRU10":["Opal Utility Jacket","$148",[["XXS",26],["XS",62],["S",71],["M",92],["L",23],["XL",10]]],"JCVT27":["Betty Vest","$118",[["XXS",11],["XS",25],["S",88],["M",81],["L",65],["XL",9]]],"JCVT66":["Baker Reversible Vest","$158",[["XXS",5],["XS",16],["S",48],["M",40],["L",25],["XL",10]]],"OWMX10":["Minxy Down Jacket","$350",[["XS",18],["S",31],["M",27],["L",33],["XL",10]]],"FLFZ50":["Briar Fleece Jacket","$108",[["XXS",18],["XS",23],["S",11],["M",14],["L",14],["XL",15]]],"JCSK99":["Hudson Stretch Cord Shacket","$88",[["XXS",24],["XS",9],["S",47],["M",1],["L",1],["XL",1]]],"SWFD35":["Aster Fuzzy Topper","$118",[["XXS",17],["XS",17],["S",7],["M",1],["XL",1]]],"OWUH19":["Horizon Down Jacket","$230",[["XS",10],["S",9],["M",5],["L",12],["XL",2]]],"OWLV50":["Davos Down Vest","$218",[["XS",8],["S",2],["M",5],["L",7],["XL",5]]],"TKBJ85":["Essential Topper","$88",[["XS",11],["S",2],["M",5]]],"JCLJ92":["Maggie Quilted Topper","$124",[["S",1],["L",15]]],"OWTB77":["Silverton Reversible Down Vest","$185",[["XS",12],["XL",3]]],"OWLP22":["Davos Down Jacket","$375",[["L",10]]],"OWVN78":["Portillo Jacket","$245",[["S",9]]],"JABC67":["Haley Bomber Jacket","$89",[["M",5]]],"JCJJ44":["Mason Reversible Jacquard Jacket","$158",[["S",2],["L",1]]],"JCQV26":["Laughlin Vest","$118",[["XXS",2]]],"JCSB30":["Posie Boucle Jacket","$88",[["L",1],["XL",1]]],"JKBN85":["Benson Reversible Jacket","$168",[["XXS",1]]],"SWRV44":["Rockvale Sweater","$88",[["XXS",64],["XS",161],["S",203],["M",234],["L",82],["XL",70]]],"SWLW90":["Zella Mesh Pullover","$76 - $82",[["XXS",20],["XS",71],["S",205],["M",269],["L",130],["XL",35]]],"SWLW64":["Zella Pullover","$76",[["XXS",3],["XS",15],["S",66],["M",172],["L",137],["XL",55]]],"JAHB11":["Roley Cowl","$79 - $84",[["XXS",3],["XS",62],["S",136],["M",138],["L",36],["XL",56]]],"FLRC20":["Rowayton Colorblock Cowl","$68 - $76",[["XXS",100],["XS",62],["S",124],["M",63],["L",35],["XL",17]]],"TKRB76":["Bodie Funnel Neck","$68",[["XXS",10],["XS",72],["S",63],["M",99],["L",33],["XL",11]]],"SWNL20":["Olivia Plush Sweater","$98",[["XXS",25],["XS",33],["S",46],["M",60],["L",69],["XL",55]]],"SWPO15":["Ruth Reversible Fuzzy Sweater","$98",[["XXS",13],["XS",41],["S",44],["M",83],["L",68],["XL",35]]],"SWCD20":["Tinsley Spacedye Sweater","$108",[["XXS",21],["XS",45],["S",125],["M",77],["L",10]]],"FLPO15":["Clara Fleece Pullover","$78",[["XXS",21],["XS",41],["S",84],["M",74],["L",30],["XL",6]]],"SWHS30":["Cayden Crew Sweater","$98",[["XS",23],["S",33],["M",81],["L",70],["XL",47]]],"SWYY15":["Field Sweater","$118",[["XXS",31],["XS",22],["S",36],["M",41],["L",37],["XL",20]]],"SWLW25":["Zella Merino Sweater","$98",[["XXS",23],["XS",34],["S",48],["M",35],["L",21],["XL",20]]],"SWPT95":["Monroe Sweater","$96",[["XXS",40],["XS",50],["S",45],["M",1],["L",12],["XL",26]]],"TKRH25":["Birdie Slub Hoodie","$82",[["XXS",33],["XS",24],["S",36],["M",32],["L",19],["XL",8]]],"TKAR45":["Denise Turtleneck","$58",[["XXS",26],["XS",40],["S",57],["M",4],["XL",8]]],"SWNS99":["Rockvale Allover Stitch","$98",[["XXS",23],["XS",79],["S",5],["M",12],["XL",15]]],"SWPH40":["Stowe Hooded Sweater","$118",[["XS",12],["S",39],["M",33],["L",32],["XL",10]]],"LTSW34":["Rowayton Cowl Neck","$68 - $72",[["XXS",22],["XS",12],["S",58],["M",4],["L",8],["XL",1]]],"SWVB77":["Ash Spacedye Sweater","$108",[["XXS",4],["XS",1],["S",29],["M",34],["L",21],["XL",7]]],"FLHS80":["Brie Sherpa Hoodie","$89",[["XXS",18],["XS",13],["S",29],["M",20],["L",7],["XL",9]]],"TKPS30":["Naomi Sweatshirt","$52 - $56",[["XXS",8],["XS",9],["S",23],["M",24],["L",1],["XL",29]]],"SWMC40":["Morgan Polo Sweater","$92",[["XXS",2],["XS",14],["S",32],["M",22],["L",18],["XL",3]]],"SWRB20":["Clarissa Sweater","$89",[["XXS",5],["XS",20],["S",29],["M",24],["L",6]]],"SWDR55":["Kirby Cardigan","$78",[["XXS",8],["S",37],["M",30],["L",2],["XL",1]]],"SWWC17":["Etta Shawl Cardigan","$138",[["XS",6],["S",33],["M",26],["L",11],["XL",2]]],"SWAV64":["Aurora Sweater","$92",[["XXS",5],["XS",14],["S",31],["M",19],["L",4],["XL",3]]],"SWZM15":["Brookline Zip","$98",[["XXS",3],["XS",5],["S",18],["M",26],["L",14],["XL",4]]],"TKPD20":["Anneke Supersoft Dolman","$56",[["XXS",22],["XS",9],["S",5],["M",8],["L",11],["XL",15]]],"FLDS40":["Lennox Fleece Top","$72",[["XXS",12],["XS",13],["S",18],["M",10],["L",9],["XL",8]]],"SWFH30":["Stowe Hooded Fairisle Sweater","$118",[["S",18],["M",25],["L",10],["XL",7]]],"FLPC75":["Roley Jacquard Cowl","$79",[["XXS",19],["XS",29],["S",1]]],"SWDS40":["Durango Plush Cardigan","$138",[["XXS",11],["XS",7],["L",8]]],"SWTN10":["Woodward Sweater","$88",[["XXS",11],["XS",6],["S",6],["L",2],["XL",1]]],"TKMN40":["Bray Mockneck Top","$48",[["XXS",14],["XS",6],["XL",4]]],"SWLV67":["Livia Sweater","$89",[["XS",23]]],"SWHN15":["Amara Pointelle Sweater","$88",[["XXS",15],["XL",5]]],"TKCT85":["Cove Supersoft Cowl","$62",[["XXS",17],["M",1],["L",1]]],"SWNY20":["Groton Sweater","$92",[["XXS",10],["L",2],["XL",4]]],"SWNM10":["Wales Sweater","$78",[["M",15]]],"SWPV30":["Phoebe Sweater Top","$78",[["XS",5],["M",5],["L",1],["XL",2]]],"SWCD85":["Tinsley Sweater","$98",[["L",2],["XL",10]]],"SSHT35":["Rainier Hoodie","$76",[["S",6],["M",1],["XL",1]]],"SWFD10":["Walsh Sweater","$92",[["XXS",8]]],"SWCD92":["Tessa Cardigan","$78",[["L",2],["XL",6]]],"SWHA43":["Delia Hoodie","$68",[["S",5],["L",1]]],"SWRS44":["Cabana Sweater","$118",[["S",2],["L",4]]],"SWWU18":["Whitcomb Sweater","$98",[["XS",1],["S",3],["M",1]]],"SWCR40":["Estes Crop Sweater","$88",[["XXS",5]]],"SWMA46":["Eastpoint Sweater","$98",[["XS",1],["S",1],["M",1]]],"SWCC36":["Idlewood Sweater","$124",[["S",3]]],"SWSB83":["Veronica Sweater","$89",[["XXS",3]]],"SWNS35":["Rockvale Deux","$98",[["XS",2],["XL",1]]],"TKDS29":["Ruby Crewneck","$68",[["XXS",2]]],"SWOF63":["Durango Sweater","$124",[["S",1]]],"TWHH80":["Gia Coverup","$74",[["XXS",22],["XS",182],["S",248],["M",206],["L",126],["XL",21]]],"DRDG20":["Blair Dress","$98",[["XXS",4],["XS",56],["S",186],["M",221],["L",95],["XL",31]]],"DRLS30":["Lana Dress","$98",[["XXS",15],["XS",84],["S",165],["M",182],["L",96],["XL",17]]],"DKPT20":["Elodie Rib Dress","$84",[["XXS",29],["XS",62],["S",124],["M",140],["L",138],["XL",58]]],"DRCB75":["Venture Balsa Dress","$88",[["XXS",17],["XS",89],["S",167],["M",153],["L",86],["XL",28]]],"PTJU75":["Nyla Twill Jumpsuit","$148",[["XXS",8],["XS",32],["S",86],["M",161],["L",140],["XL",44]]],"DRTF45":["Coastal Cover Up","$68",[["XXS",13],["XS",49],["S",132],["M",169],["L",54],["XL",21]]],"DRWV40":["Macy Dress","$89",[["XXS",5],["XS",43],["S",108],["M",91],["L",104],["XL",41]]],"DRTS08":["Lexi Dress","$78",[["XXS",7],["XS",26],["S",81],["M",113],["L",88],["XL",34]]],"DRJU55":["Remi Romper","$98",[["XXS",6],["XS",14],["S",82],["M",127],["L",77],["XL",26]]],"DRBL70":["Nellie Linen Dress","$98",[["XXS",6],["XS",35],["S",92],["M",101],["L",47],["XL",24]]],"DRNN10":["Nellie Eyelet Dress","$98",[["XXS",2],["XS",19],["S",90],["M",76],["L",63],["XL",15]]],"DRFS10":["Maeve Dress","$78",[["XXS",1],["S",51],["M",64],["L",80],["XL",18]]],"SHJU30":["Nyla Linen Romper","$98",[["XXS",11],["XS",32],["S",58],["M",54],["L",35],["XL",7]]],"DRTD70":["Jacey Textured Dress","$98",[["XXS",4],["XS",15],["S",48],["M",74],["L",34],["XL",15]]],"PTJU25":["Bedford Jumpsuit","$174",[["XXS",25],["XS",36],["S",29],["M",38],["L",31],["XL",20]]],"DRTD10":["Nellie Dress","$98",[["XS",14],["S",45],["M",42],["L",21],["XL",9]]],"DKJS34":["Bonfire Jumpsuit","$98",[["S",54],["L",9],["XL",12]]],"DRKT60":["Gemma Dress","$89",[["XS",5],["S",20],["M",6]]],"DRDG55":["Memphis Gauze Dress","$110",[["XXS",8],["XS",6],["M",5],["L",8],["XL",1]]],"DRWV90":["Kiera Dress","$109",[["S",4],["L",1],["XL",19]]],"DRSR70":["Giselle Romper","$89",[["XS",17],["M",6]]],"DRCE24":["Camila Dress","$68",[["L",9]]],"DWBD99":["Aida Dress","$110",[["M",5]]],"DCBF51":["Iris Coverup","$78",[["S",1],["L",3]]],"DRST64":["Vikki Dress","$86",[["M",4]]],"DKCO21":["Napa Dress","$72",[["S",1]]],"DRWB38":["Blakely Dress","$82",[["XL",1]]],"DRPV10":["Hadley Dress","$88",[["S",1]]],"DWMB33":["Mabel Dress","$92",[["XL",1]]],"DRAM44":["Nora Dress","$88",[["M",1]]],"PTJU30":["Knox Gauze Jumpsuit","$98",[["M",1]]],"PTSJ26":["Skyler Skinny Jean","$99",[["00",177],["2",286],["4",545],["6",511],["8",340],["10",266],["12",111],["14",10]]],"PTSL62":["Brady Straight Leg","$110",[["00",77],["2",272],["4",405],["6",425],["8",379],["10",284],["12",105]]],"PTPO28":["Alma Jean","$98",[["00",2],["2",82],["4",203],["6",231],["8",227],["10",103],["12",83],["14",16]]],"PTBJ70":["Chelsea Jogger","$72",[["XXS",6],["XS",90],["S",265],["M",271],["L",135],["XL",57]]],"PTOV46":["Jason Cord Overall","$136",[["00",25],["2",101],["4",116],["6",163],["8",170],["10",91],["12",67],["14",54]]],"PTHB41":["Incline Tight","$74",[["XXS",31],["XS",52],["S",185],["M",159],["L",146],["XL",73]]],"PTSC35":["Skyler Skinny Cord","$99",[["00",37],["2",55],["4",68],["6",76],["8",56],["10",48],["12",42],["14",30]]],"PTFL88":["Sausalito Pant","$98",[["00",8],["2",28],["4",57],["6",57],["8",27],["10",17],["12",17],["14",11]]],"PTWJ30":["Calista Pant","$78",[["XS",15],["S",43],["M",57],["L",20]]],"PTWL35":["Rex Wide Leg","$98 - $99",[["00",27],["2",6],["4",19],["6",26],["8",28],["10",3],["12",8],["14",1]]],"PTFL79":["Tibby Flare","$124",[["00",12],["2",14],["4",11],["6",19],["8",31],["10",12],["12",1],["14",8]]],"PTOV90":["Jason Railroad Stripe Overall","$136",[["00",2],["4",4],["6",18],["8",27],["10",24],["12",22],["14",9]]],"PTRD75":["Suki Linen Pant","$82",[["XXS",8],["XS",6],["S",31],["M",27],["L",5],["XL",2]]],"PTWY89":["Avery Beach Pant","$68",[["XS",5],["S",22],["M",28],["L",7],["XL",7]]],"PTCB50":["Corey Butter Pant","$118",[["00",2],["10",5],["12",15],["14",28]]],"PTPP72":["Corey Pant","$99",[["00",10],["10",3],["12",20],["14",16]]],"PTHC30":["Carson Cord Hi Rise","$99",[["2",7],["4",5],["8",5],["10",13],["12",12]]],"PTDG01":["Calista Gauze Pant","$84",[["XXS",5],["XS",1],["S",11],["M",5]]],"PTMJ28":["Carson Hi Rise Jean","$99",[["00",6],["2",1],["4",13],["6",1],["14",1]]],"PTCC48":["Carson Cord","$98 - $99",[["00",1],["4",2],["6",3],["10",9],["14",1],["16",5]]],"PTBF18":["Carson Jean","$99",[["00",3],["12",11],["16",6]]],"PTCG75":["Nina Cargo Pant","$118",[["00",11],["2",3]]],"PTKA40":["Kaia Pant","$78",[["M",12],["L",1]]],"PTCG10":["Zoe Twill Pant","$98",[["L",1],["XL",4]]],"PTJG78":["Garner Jogger","$56",[["M",4]]],"PTCC70":["Austin Crop Jean","$110",[["6",4]]],"PTJH19":["Portland Wide Leg","$98",[["2",3]]]};
+function copyText(t){
+  const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).catch(fb)}else{fb()}
+}
+let lastSku=null,sendTimer=null;
+const ann=document.getElementById('ann');
+try{if(localStorage.getItem('ann')==='0')ann.checked=false}catch(e){}
+ann.onchange=()=>{try{localStorage.setItem('ann',ann.checked?'1':'0')}catch(e){}};
+const sendBox=document.getElementById('send'),bar=document.getElementById('bar'),sendBtn=document.getElementById('sendbtn');
+function showSend(){
+  clearTimeout(sendTimer);sendBtn.textContent='SEND IN CHAT';sendBox.hidden=false;
+  bar.classList.remove('go');void bar.offsetWidth;bar.classList.add('go');
+  sendTimer=setTimeout(()=>{sendBox.hidden=true},5000);
+}
+sendBtn.onclick=()=>{clearTimeout(sendTimer);window.postMessage({type:'skubundl-send'},'*');sendBtn.textContent='Sending...';setTimeout(()=>{sendBox.hidden=true},700)};
+window.addEventListener('message',e=>{
+  if(e.source!==window||!e.data||e.data.type!=='skubundl-sent'||!lastSku)return;
+  lastSku.textContent=lastSku.textContent.replace(/ - (copied|typed|sent|could).*$/,'')+(e.data.ok?' - SENT':' - could not send, press Enter in Whatnot');
+});
+window.addEventListener('message',e=>{
+  if(e.source!==window||!e.data||e.data.type!=='skubundl-typed'||!lastSku)return;
+  lastSku.textContent=lastSku.textContent.replace(/ - (copied|typed).*$/,'')+(e.data.ok?' - typed in Whatnot chat: ':' - copied (Whatnot chat not found): ')+e.data.text;
+  if(e.data.ok)showSend();
+});
+const q=document.getElementById('q'),out=document.getElementById('out');
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toUpperCase();out.innerHTML='';
+  if(!v)return;
+  Object.keys(D).filter(k=>k.includes(v)).slice(0,10).forEach(k=>{
+    const [n,p,sz]=D[k];
+    const sel=new Set();
+    const d=document.createElement('div');d.className='row';
+    d.innerHTML='<div class="main"><div><b>'+n+'</b><div class="sku">'+k+'</div></div><div class="price">'+p+'</div></div><div class="chips"></div>';
+    const chips=d.querySelector('.chips');
+    sz.forEach(([l,c])=>{
+      const e=document.createElement('span');e.className='chip';e.innerHTML=l+'<small>'+c+'</small>';
+      e.onclick=ev=>{ev.stopPropagation();if(sel.has(l)){sel.delete(l);e.classList.remove('on')}else{sel.add(l);e.classList.add('on')}};
+      chips.appendChild(e);
+    });
+    d.querySelector('.main').onclick=()=>{
+      const picked=sz.map(x=>x[0]).filter(l=>sel.has(l));
+      const txt=p+' '+n+(picked.length?' '+picked.join(', '):'');
+      copyText(txt);window.postMessage({type:'skubundl-type',text:(ann.checked?'/announce ':'')+txt},'*');
+      document.querySelectorAll('.row').forEach(r=>r.classList.remove('copied'));d.classList.add('copied');
+      lastSku=d.querySelector('.sku');lastSku.textContent=k+' - copied: '+txt};
+    out.appendChild(d);
+  });
+  if(!out.children.length)out.innerHTML='<div class="hint">No match</div>';
+});
+/* ===== Listen to tab audio ===== */
+const PS=new Set(),PFX=new Set();
+Object.keys(D).forEach(k=>{PFX.add(k.slice(0,3));for(let i=1;i<=k.length;i++)PS.add(k.slice(0,i))});
+const LET={a:'A',ay:'A',b:'B',bee:'B',be:'B',c:'C',see:'C',sea:'C',cee:'C',d:'D',dee:'D',e:'E',f:'F',eff:'F',ef:'F',g:'G',gee:'G',h:'H',aitch:'H',i:'I',eye:'I',j:'J',jay:'J',k:'K',kay:'K',l:'L',el:'L',m:'M',em:'M',n:'N',en:'N',o:'O',oh:'O',p:'P',pee:'P',q:'Q',cue:'Q',queue:'Q',r:'R',are:'R',s:'S',ess:'S',t:'T',tee:'T',tea:'T',u:'U',you:'U',v:'V',vee:'V',w:'W',x:'X',ex:'X',y:'Y',why:'Y',z:'Z',zee:'Z',zed:'Z'};
+const DIG={zero:'0',oh:'0',one:'1',won:'1',two:'2',to:'2',too:'2',three:'3',tree:'3',four:'4',for:'4',fore:'4',five:'5',six:'6',seven:'7',eight:'8',ate:'8',nine:'9'};
+const TEEN={ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19};
+const TENS={twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+function atomOf(t,ri){
+  const o=[];
+  if(/^\d+$/.test(t))o.push(t);
+  else{
+    if(LET[t])o.push(LET[t]);
+    if(DIG[t])o.push(DIG[t]);
+    if(TEEN[t])o.push(String(TEEN[t]));
+    if(TENS[t])o.push(String(TENS[t]));
+    if(/^[a-z0-9]{2,6}$/.test(t))o.push(t.toUpperCase());
+  }
+  return{opts:[...new Set(o)],ri};
+}
+function buildAtoms(items){ // items: [{t,ri}]
+  const out=[];
+  for(let i=0;i<items.length;i++){
+    const {t,ri}=items[i],nx=items[i+1]&&items[i+1].t;
+    if((t==='double'||t==='triple'||t==='dubble')&&nx){
+      if(nx==='u'||nx==='you'){out.push({opts:['W'],ri});i++;continue}
+      const a=atomOf(nx,ri),n=t==='triple'?3:2;
+      out.push({opts:a.opts.map(x=>x.length===1?x.repeat(n):x),ri});i++;continue;
+    }
+    if(TENS[t]&&nx&&/^(one|two|three|four|five|six|seven|eight|nine)$/.test(nx)){
+      out.push({opts:[String(TENS[t]+ +DIG[nx])],ri});i++;continue;
+    }
+    out.push(atomOf(t,ri));
+  }
+  return out;
+}
+function extend(atoms,i,cand){
+  let best={s:cand,used:0};
+  if(cand.length>=6||i>=atoms.length)return best;
+  for(const o of atoms[i].opts){
+    const n=cand+o;
+    if(PS.has(n)){const r=extend(atoms,i+1,n);if(r.s.length>best.s.length)best={s:r.s,used:r.used+1}}
+  }
+  return best;
+}
+// find the most recently spoken SKU (or prefix) in the atom list
+function findSku(atoms){
+  const hits=[];
+  for(let s=0;s<atoms.length;s++){
+    const r=extend(atoms,s,'');
+    if(r.s.length>=3&&PFX.has(r.s.slice(0,3)))hits.push({s,used:r.used,c:r.s});
+  }
+  if(!hits.length)return null;
+  let pick=hits[hits.length-1];
+  for(const h of hits){if(h!==pick&&h.s<pick.s&&h.s+h.used>pick.s){pick=h;break}}
+  return{cand:pick.c,ri:atoms[pick.s].ri};
+}
+// ---- audio + speech recognition ----
+const lbtn=document.getElementById('listen'),lst=document.getElementById('lstat'),lheard=document.getElementById('heard');
+let rec=null,track=null,listening=false,sess=0,lastKey='',lastTyped=0;
+q.addEventListener('keydown',()=>{lastTyped=Date.now()});
+function onSpeech(e){
+  const items=[];
+  for(let i=0;i<e.results.length;i++){
+    String(e.results[i][0].transcript).toLowerCase().replace(/[^a-z0-9\s'-]/g,' ').replace(/[-']/g,' ').split(/\s+/).filter(Boolean).forEach(t=>items.push({t,ri:i}));
+  }
+  const win=items.slice(-40);
+  lheard.textContent=win.slice(-12).map(x=>x.t).join(' ');
+  const f=findSku(buildAtoms(win));
+  if(!f)return;
+  const key=sess+':'+f.ri+':'+f.cand;
+  if(key===lastKey)return;
+  lastKey=key;
+  if(document.activeElement===q&&Date.now()-lastTyped<4000)return; // don't fight manual typing
+  q.value=f.cand;q.dispatchEvent(new Event('input'));
+  lst.textContent='Heard: '+f.cand;
+}
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){lst.textContent='This browser has no speech recognition. Use Chrome.';return false}
+  rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang='en-US';rec.maxAlternatives=1;
+  sess++;lastKey='';
+  rec.onresult=onSpeech;
+  rec.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){lst.textContent='Speech recognition blocked: '+ev.error;stopListen()}};
+  rec.onend=()=>{if(listening)setTimeout(()=>{if(listening){try{startRec()}catch(x){}}},250)};
+  try{rec.start(track)}catch(err){
+    lst.textContent='Your Chrome is too old to read tab audio directly (needs Chrome 139+). Update Chrome.';
+    stopListen();return false;
+  }
+  return true;
+}
+async function startListen(){
+  try{
+    const st=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+    track=st.getAudioTracks()[0];
+    st.getVideoTracks().forEach(t=>t.stop());
+    if(!track){lst.textContent='No audio shared. Pick the Whatnot TAB and tick "Also share tab audio".';return}
+    track.onended=()=>stopListen();
+    listening=true;lbtn.textContent='Stop listening';lbtn.classList.add('on');
+    lst.textContent='Listening for '+PFX.size+' SKU prefixes...';
+    startRec();
+  }catch(err){lst.textContent='Cancelled or blocked: '+err.name}
+}
+function stopListen(){
+  listening=false;lbtn.textContent='Listen to tab audio';lbtn.classList.remove('on');
+  try{rec&&rec.abort()}catch(e){}
+  try{track&&track.stop()}catch(e){}
+  rec=null;track=null;
+}
+lbtn.onclick=()=>listening?(stopListen(),lst.textContent='Stopped'):startListen();
+window.__skuParse=txt=>findSku(buildAtoms(txt.toLowerCase().replace(/[-']/g,' ').split(/\s+/).filter(Boolean).map(t=>({t,ri:0}))));
+</script></body></html>
