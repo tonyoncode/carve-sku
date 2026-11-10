@@ -401,14 +401,11 @@ embed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast
 <input id="q" placeholder="Type SKU e.g. DRDG55" autofocus="" autocomplete="off">
 <button id="listen">Listen to tab audio</button><div id="lstat"></div><div id="heard"></div>
 <div id="out"></div>
-<div class="hint">Pick sizes (optional), then click the name/price to copy: <i>$110 Memphis Gauze Dress S, M</i></div>
+<div class="hint">Click a size to type it in chat: <i>$110 Memphis Gauze Dress S</i>. Click the name/price to type it without a size.</div>
 </div>
 <div id="side">
 <b>Sizes</b>
 <div class="szgrid" id="szgrid"></div>
-<div id="sizeprev"></div>
-<div class="szbtns"><button id="szall" type="button">All</button><button id="szclear" type="button">Clear</button></div>
-<div class="szbtns"><button id="szsend" type="button">Send sizes</button></div>
 <div id="sstat"></div>
 </div>
 </div>
@@ -444,21 +441,20 @@ q.addEventListener('input',()=>{
   if(!v)return;
   Object.keys(D).filter(k=>k.includes(v)).slice(0,10).forEach(k=>{
     const [n,p,sz]=D[k];
-    const sel=new Set();
-    const d=document.createElement('div');d.className='row';
+        const d=document.createElement('div');d.className='row';
     d.innerHTML='<div class="main"><div><b>'+n+'</b><div class="sku">'+k+'</div></div><div class="price">'+p+'</div></div><div class="chips"></div>';
     const chips=d.querySelector('.chips');
     sz.forEach(([l,c])=>{
       const e=document.createElement('span');e.className='chip';e.innerHTML=l+'<small>'+c+'</small>';
-      e.onclick=ev=>{ev.stopPropagation();if(sel.has(l)){sel.delete(l);e.classList.remove('on')}else{sel.add(l);e.classList.add('on')}};
+      e.onclick=ev=>{ev.stopPropagation();fire(p+' '+n+' '+l,[e])};
       chips.appendChild(e);
     });
-    d.querySelector('.main').onclick=()=>{
-      const picked=sz.map(x=>x[0]).filter(l=>sel.has(l));
-      const txt=p+' '+n+(picked.length?' '+picked.join(', '):'');
+    function fire(txt,on){
       copyText(txt);window.postMessage({type:'skubundl-type',text:(ann.checked?'/announce ':'')+txt},'*');
       document.querySelectorAll('.row').forEach(r=>r.classList.remove('copied'));d.classList.add('copied');
-      lastSku=d.querySelector('.sku');lastSku.textContent=k+' - copied: '+txt};
+      chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));on.forEach(c=>c.classList.add('on'));
+      lastSku=d.querySelector('.sku');lastSku.textContent=k+' - copied: '+txt}
+    d.querySelector('.main').onclick=()=>fire(p+' '+n,[]);
     out.appendChild(d);
   });
   if(!out.children.length)out.innerHTML='<div class="hint">No match</div>';
@@ -572,25 +568,18 @@ function stopListen(){
   rec=null;track=null;
 }
 lbtn.onclick=()=>listening?(stopListen(),lst.textContent='Stopped'):startListen();
-/* ===== Sizes tab ===== */
+/* ===== Sizes: one click types it ===== */
 const SIZES=['XXS','XS','S','M','L','XL','2X','3X','4X'];
-const szSel=new Set(),szGrid=document.getElementById('szgrid'),szPrev=document.getElementById('sizeprev'),sstat=document.getElementById('sstat');
-function szText(){return SIZES.filter(x=>szSel.has(x)).join(', ')}
-function szRefresh(){szPrev.textContent=szText()||'No sizes selected'}
+const szGrid=document.getElementById('szgrid'),sstat=document.getElementById('sstat');
 SIZES.forEach(l=>{
   const c=document.createElement('span');c.className='chip';c.textContent=l;
-  c.onclick=()=>{if(szSel.has(l)){szSel.delete(l);c.classList.remove('on')}else{szSel.add(l);c.classList.add('on')}szRefresh()};
+  c.onclick=()=>{
+    copyText(l);window.postMessage({type:'skubundl-type',text:(ann.checked?'/announce ':'')+l},'*');
+    [...szGrid.children].forEach(x=>x.classList.remove('on'));c.classList.add('on');
+    lastSku=sstat;sstat.textContent='Size - copied: '+l;
+  };
   szGrid.appendChild(c);
 });
-function szSetAll(on){szSel.clear();[...szGrid.children].forEach((c,i)=>{c.classList.toggle('on',on);if(on)szSel.add(SIZES[i])});szRefresh()}
-document.getElementById('szall').onclick=()=>szSetAll(true);
-document.getElementById('szclear').onclick=()=>szSetAll(false);
-document.getElementById('szsend').onclick=()=>{
-  const t=szText();if(!t){sstat.textContent='Pick at least one size first';return}
-  copyText(t);window.postMessage({type:'skubundl-type',text:(ann.checked?'/announce ':'')+t},'*');
-  lastSku=sstat;sstat.textContent='Sizes - copied: '+t;
-};
-szRefresh();
 /* ===== Sizes panel on/off ===== */
 const side=document.getElementById('side'),tog=document.getElementById('sizetog');
 function showSizes(on){
