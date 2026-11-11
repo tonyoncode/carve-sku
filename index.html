@@ -142,10 +142,10 @@ input:focus{outline:none;border-color:#4d9bff}
 #listen.on{background:#1f4d8f;border-color:#4d9bff}
 #lstat{font-size:13px;color:#8b93a1;margin-top:6px}#heard{font-size:12px;color:#6b7280;margin-top:2px;min-height:15px}
 body.wide{max-width:980px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tgs{display:flex;gap:8px;flex-wrap:wrap}
 .top h1{margin:0}
-#sizetog{padding:8px 14px;font-size:14px;font-weight:700;border:2px solid #3a3f4b;border-radius:10px;background:#232733;color:#e8eaed;cursor:pointer;white-space:nowrap}
-#sizetog.on{background:#1f4d8f;border-color:#4d9bff}
+.tg{padding:8px 14px;font-size:14px;font-weight:700;border:2px solid #3a3f4b;border-radius:10px;background:#232733;color:#e8eaed;cursor:pointer;white-space:nowrap}
+.tg.on{background:#1f4d8f;border-color:#4d9bff}
 #wrap{display:flex;gap:20px;align-items:flex-start;margin-top:12px}
 #mainc{flex:1 1 0;min-width:0}
 #side{flex:0 0 320px;position:sticky;top:12px}
@@ -393,8 +393,7 @@ td[background="https://services.google.com/fh/files/emails/bg_grey.png"] {
     background-image: none !important;
 }
 embed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }</style></head><body>
-<div class="top"><h1>Carve SKU Finder</h1><button id="sizetog" type="button" class="on">Sizes: ON</button></div>
-<label class="opt"><input type="checkbox" id="ann" checked=""> Use /announce</label>
+<div class="top"><h1>Carve SKU Finder</h1><div class="tgs"><button id="anntog" class="tg on" type="button">/announce: ON</button><button id="autotog" class="tg" type="button">Auto send: OFF</button><button id="sizetog" class="tg on" type="button">Sizes: ON</button></div></div>
 <div id="send" hidden=""><button id="sendbtn">SEND IN CHAT</button><div id="bar"></div></div>
 <div id="wrap">
 <div id="mainc">
@@ -416,16 +415,23 @@ function copyText(t){
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).catch(fb)}else{fb()}
 }
 let lastSku=null,sendTimer=null;
-const ann=document.getElementById('ann');
-try{if(localStorage.getItem('ann')==='0')ann.checked=false}catch(e){}
-ann.onchange=()=>{try{localStorage.setItem('ann',ann.checked?'1':'0')}catch(e){}};
+function mkToggle(id,key,label,def){
+  const b=document.getElementById(id),o={checked:def};
+  try{const v=localStorage.getItem(key);if(v==='1')o.checked=true;if(v==='0')o.checked=false}catch(e){}
+  const paint=()=>{b.classList.toggle('on',o.checked);b.textContent=label+': '+(o.checked?'ON':'OFF')};
+  b.onclick=()=>{o.checked=!o.checked;paint();try{localStorage.setItem(key,o.checked?'1':'0')}catch(e){}};
+  paint();return o;
+}
+const ann=mkToggle('anntog','ann','/announce',true);
+const auto=mkToggle('autotog','autosend','Auto send',false);
 const sendBox=document.getElementById('send'),bar=document.getElementById('bar'),sendBtn=document.getElementById('sendbtn');
 function showSend(){
   clearTimeout(sendTimer);sendBtn.textContent='SEND IN CHAT';sendBox.hidden=false;
   bar.classList.remove('go');void bar.offsetWidth;bar.classList.add('go');
   sendTimer=setTimeout(()=>{sendBox.hidden=true},5000);
 }
-sendBtn.onclick=()=>{clearTimeout(sendTimer);window.postMessage({type:'skubundl-send'},'*');sendBtn.textContent='Sending...';setTimeout(()=>{sendBox.hidden=true},700)};
+function doSend(){clearTimeout(sendTimer);window.postMessage({type:'skubundl-send'},'*');sendBtn.textContent='Sending...';setTimeout(()=>{sendBox.hidden=true},700)}
+sendBtn.onclick=doSend;
 window.addEventListener('message',e=>{
   if(e.source!==window||!e.data||e.data.type!=='skubundl-sent'||!lastSku)return;
   lastSku.textContent=lastSku.textContent.replace(/ - (copied|typed|sent|could).*$/,'')+(e.data.ok?' - SENT':' - could not send, press Enter in Whatnot');
@@ -433,7 +439,7 @@ window.addEventListener('message',e=>{
 window.addEventListener('message',e=>{
   if(e.source!==window||!e.data||e.data.type!=='skubundl-typed'||!lastSku)return;
   lastSku.textContent=lastSku.textContent.replace(/ - (copied|typed).*$/,'')+(e.data.ok?' - typed in Whatnot chat: ':' - copied (Whatnot chat not found): ')+e.data.text;
-  if(e.data.ok)showSend();
+  if(e.data.ok){if(auto.checked){setTimeout(doSend,150)}else showSend()}
 });
 const q=document.getElementById('q'),out=document.getElementById('out');
 q.addEventListener('input',()=>{
