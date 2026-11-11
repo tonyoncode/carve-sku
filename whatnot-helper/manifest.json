@@ -14,10 +14,10 @@
     {
       "matches": [
         "https://skuhelp.vercel.app/*",
-        "https://carve-sku.vercel.app/*",
         "https://skuhelp.netlify.app/*",
         "https://skubundl.netlify.app/*",
         "https://*.skubundl.netlify.app/*",
+        "https://carve-sku.vercel.app/*",
         "http://localhost/*",
         "file:///*"
       ],

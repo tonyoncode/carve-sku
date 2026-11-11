@@ -86,7 +86,35 @@ async function announce(el, text) {
   return true;
 }
 
+// Sends whatever is in the chat bar: Enter key first, then a Send button as backup
+async function sendChat(el) {
+  if (!(valueOf(el) || "").trim()) return false;
+  el.focus();
+  for (const t of ["keydown", "keypress", "keyup"]) {
+    el.dispatchEvent(new KeyboardEvent(t, { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+  }
+  await wait(250);
+  if (!(valueOf(el) || "").trim()) return true; // chat bar cleared = sent
+  // Backup: click a Send button near the chat bar
+  const isSend = x => visible(x) && (x.type === "submit" || /^send$/i.test((x.getAttribute("aria-label") || x.title || x.textContent || "").trim()));
+  let scope = el;
+  for (let i = 0; i < 5 && scope.parentElement; i++) {
+    scope = scope.parentElement;
+    const btn = [...scope.querySelectorAll('button,[role="button"]')].find(isSend);
+    if (btn) { press(btn); await wait(250); return !(valueOf(el) || "").trim(); }
+  }
+  const form = el.closest("form");
+  if (form && form.requestSubmit) { form.requestSubmit(); await wait(250); return !(valueOf(el) || "").trim(); }
+  return false;
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg.type === "send") {
+    const c = findChat();
+    if (!c) return;
+    sendChat(c).then(ok => reply({ ok }), () => reply({ ok: false }));
+    return true;
+  }
   if (msg.type !== "type") return;
   const el = findChat();
   if (!el) return; // another frame may have the chat bar

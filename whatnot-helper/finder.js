@@ -7,3 +7,12 @@ window.addEventListener("message", e => {
     window.postMessage({ type: "skubundl-typed", ok: !!(res && res.ok), text: e.data.text }, "*");
   });
 });
+
+// "Send" button on the page: press Enter / Send in the Whatnot chat
+window.addEventListener("message", e => {
+  if (e.source !== window || !e.data || e.data.type !== "skubundl-send") return;
+  chrome.runtime.sendMessage({ type: "send" }, res => {
+    void chrome.runtime.lastError;
+    window.postMessage({ type: "skubundl-sent", ok: !!(res && res.ok) }, "*");
+  });
+});
